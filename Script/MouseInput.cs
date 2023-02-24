@@ -21,7 +21,7 @@ public class MouseInput : MonoBehaviour
 
     public void updateMouseInput()
     {
-        if (ExecuteLogic.isSwap || ExecuteLogic.isMoving)
+        if (ExecuteLogic.isSwap || ExecuteLogic.isLocked)
             return;
         mouseClick();
         mouseDrag();

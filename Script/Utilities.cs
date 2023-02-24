@@ -34,15 +34,21 @@ public static class Utilities
     {
         if (isControl)
         {
-            if (p1.kind == 5 || p2.kind == 5)
+            if (p1 is RainbowBlock || p2 is RainbowBlock)
             {
-
-
+                var rain = p2 as RainbowBlock;
+                if (rain)
+                {
+                    p1.arriveDestAction += rain.arrive;         
+                    rain.readyItem(p1.kind);
+                }
+                else
+                {
+                    rain = p1 as RainbowBlock;
+                    rain.readyItem(p2.kind);
+                }
                 p1.row = p2.row;
                 p1.col = p2.col;
-
-                p1.rainbowTarget = p2;
-                p2.rainbowTarget = p1;
                 return;
             }
 
@@ -65,7 +71,7 @@ public static class Utilities
 
     public static void swapMove(BasicBlock[,] grid, Direction dir)
     {
-        if (ExecuteLogic.isSwap || ExecuteLogic.isMoving)
+        if (ExecuteLogic.isSwap || ExecuteLogic.isLocked)
             return;
 
         if (clickBlock1 is SnowBlock)

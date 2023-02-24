@@ -10,16 +10,13 @@ public class ExecuteLogic : MonoBehaviour
 {
     public static readonly int n = 8, m = 8;
     public static float tileSize; //타일 사이즈
-    
-    BasicBlock[,] grid = new BasicBlock[n+1,m+1];
-    public static bool isSwap = false, isMoving = false, isStop = false;
 
+    BasicBlock[,] grid = new BasicBlock[n + 1, m + 1];
+    public static bool isSwap = false, isMovePause = false, isGameEnd=false;
+    public static bool isLocked { get; private set; } = false; 
     [SerializeField]
     private BasicBlock blockPrefab1, blockPrefab2, blockPrefab3, blockPrefab4;
 
-    [SerializeField]
-    static private Text goal_text;
-    static int goal =3;
 
     CheckTheMatch checkTheMatch;
     MouseInput mouseInput;
@@ -38,15 +35,10 @@ public class ExecuteLogic : MonoBehaviour
         var pos1 = Utilities.startPoint1.position;
         var pos2 = Utilities.startPoint2.position;
         tileSize = Mathf.Abs(pos1.x - pos2.x);
-
-        goal_text = GameObject.Find("GoalText").GetComponent<Text>();
-        goal_text.text = goal.ToString();
-
+ 
         initObjectPool();
         boardInit();
         initObject();
-
-       
     }
 
     void initObjectPool()
@@ -74,50 +66,75 @@ public class ExecuteLogic : MonoBehaviour
         drawtheBoard.init(grid);
     }
 
+    void boardInit()
+    {
+        for (int i = 0; i <= n; i++)
+        {
+            for (int j = 0; j <= m; j++)
+            {
+                grid[i, j] = basicBlockPool.GetObject();
+                var nowBlock = grid[i, j];
+                nowBlock.init(grid, i, j);
+            }
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            Utilities.ChangeBlock(grid, grid[6, 2], rainBowBlockPool.GetObject());
-
-
-        }
-
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            Utilities.ChangeBlock(grid, grid[7, 2], rainBowBlockPool.GetObject());
+            isLocked = true;
+            Utilities.ChangeBlock(grid, grid[1, 1], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 2], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 3], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 4], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 5], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 6], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 7], ribbonBlockPool.GetObject());
 
-            
+
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            Utilities.ChangeBlock(grid, grid[4, 2], ribbonBlockPool.GetObject());
+            Utilities.ChangeBlock(grid, grid[1, 2], ribbonBlockPool.GetObject());
+
+
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            grid[6, 2].tryToErase();
+            Utilities.ChangeBlock(grid, grid[2, 3], ribbonBlockPool.GetObject());
         }
+
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            
+            Utilities.ChangeBlock(grid, grid[1, 4], ribbonBlockPool.GetObject());
         }
-
-
-
-        mouseInput.updateMouseInput();
-        
-        if (isMoving == false )
+        if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            checkTheMatch.checkMatch();
-            checkTheMatch.checkItemMatch();
+            Utilities.ChangeBlock(grid, grid[1, 5], ribbonBlockPool.GetObject());
         }
-        
+      
+
+
+
+        if (GameManager.Instance.isGameEnd == false)
+            mouseInput.updateMouseInput();
+
+
+        itemTime();
+
+        checkTheMatch.checkMatch();
+
+
+
         moveBlock();
-        eraseInProgress();
+
+        updateAlpha();
+
         itemTime();
 
         undoNotMatchingBlock();
@@ -126,34 +143,16 @@ public class ExecuteLogic : MonoBehaviour
 
     }
 
-    void boardInit()
-    {
-        for (int i = 0; i <= n; i++)
-        {
-            for (int j = 0; j <= m; j++)
-            {
-                grid[i, j] = basicBlockPool.GetObject(); 
-                var nowBlock = grid[i, j];
-
-                nowBlock.init(grid , i ,j);
-
-
-               
-
-               // setSprite(nowBlock, nowBlock.kind);
-               // setPosition(nowBlock);
-            }
-        }
-    }
+    
     
    
     void moveBlock()
     {
-        if (isStop)
+        if (isMovePause)
             return;
 
         //////무빙 
-        isMoving = false;
+        isLocked = false;
         for (int i = 1; i < n; i++)
         {
             for (int j = 1; j < m; j++)
@@ -161,104 +160,103 @@ public class ExecuteLogic : MonoBehaviour
                 var nowBlock = grid[i, j];
                 if (nowBlock.moveToDest())
                 {
-                    isMoving = true;
+                    isLocked = true;
                 }
 
             }
         }
     }
 
-
-    void checkErasePrgress()
+    void updateAlpha()
     {
         ////삭제 애니
-        if (!isMoving) //지금 재정비중이면 이거x
-            for (int i = 1; i < n; i++)
+        if (isLocked) //지금 재정비중이면 이거x
+            return;
+
+        for (int i = 1; i < n; i++)
+        {
+            for (int j = 1; j < m; j++)
             {
-                for (int j = 1; j < m; j++)
+                var nowBlock = grid[i, j];
+                if (nowBlock.match == true)
                 {
-                    if (grid[i, j].match == true)
-                    {
-                        isMoving = true;
-                        return;
-                    }
-                    else
-                    {
-                        if (grid[i, j].alpha < 1f)
-                        {
-                            isMoving = true;
-                            return;
-                        }
-                    }
+                    alphaDown(nowBlock); 
+                }
+                else
+                {
+                    alphaUp(nowBlock);
                 }
             }
+        }
+
     }
 
-    void eraseInProgress()
+    void alphaDown(BasicBlock block)
     {
-        ////삭제 애니
-        if (!isMoving) //지금 재정비중이면 이거x
-            for (int i = 1; i < n; i++)
-            {
-                for (int j = 1; j < m; j++)
-                {
-                    if (grid[i, j].match == true)
-                    {
-                        if (grid[i, j].alpha > 0f)
-                        {
-                            grid[i, j].alpha -= Time.deltaTime;
-                            isMoving = true;
-                        }
-                    }
-                    else
-                    {
-                        if (grid[i, j].alpha < 1f)
-                        {
-                            isMoving = true;
-                            grid[i, j].alpha += Time.deltaTime;
-                        }
-                    }
-                }
-            }
+        if (0f < block.alpha)
+        {
+            block.alpha -= Time.deltaTime;
+            isLocked = true;
+        }
     }
+
+    void alphaUp(BasicBlock block)
+    {
+        if (block.alpha < 1f)
+        {
+            block.alpha += Time.deltaTime;
+            isLocked = true;
+        }
+    }
+
+    
 
     void itemTime()
     {
         ////삭제 애니
-        if (!isMoving) //지금 재정비중이면 이거x
-            for (int i = 1; i < n; i++)
+        if (isLocked) //지금 재정비중이면 이거x
+            return;
+
+        for (int i = 1; i < n; i++)
+        {
+            for (int j = 1; j < m; j++)
             {
-                for (int j = 1; j < m; j++)
+                if (grid[i, j].itemOn == true)
                 {
-                    if (grid[i, j].itemOn == true)
-                    {
-                        if(grid[i, j].useItem())
-                            isMoving = true;
-                    }
+                    if (grid[i, j].useItem())
+                        isLocked = true;
                 }
             }
+        }
     }
 
     void undoNotMatchingBlock()
     {
         //스코어업
-        int score = 0;
+        bool match = false;
         for (int i = 1; i <= n; i++)
         {
             for (int j = 1; j <= m; j++)
             {
                 if (grid[i, j].match)
-                    score += 1;
+                {
+                    match = true;
+                    break;
+                }
             }
+            if (match)
+                break;
         }
 
         //두번 쨰 스왑때 매칭이 안됐을 시
-        if (isSwap && !isMoving)
+        if (isSwap && !isLocked)
         {
-            if (score == 0)
+            if (match == false)
             {
                 Utilities.swap(grid, Utilities.clickBlock1, Utilities.clickBlock2);
             }
+            else
+                GameManager.Instance.moveProgress();
 
             isSwap = false;
         }
@@ -266,7 +264,7 @@ public class ExecuteLogic : MonoBehaviour
 
     void orderBoard()
     {
-        if (isMoving)
+        if (isLocked)
             return;
 
         for (int i = n-1; i > 0; i--)
@@ -275,11 +273,14 @@ public class ExecuteLogic : MonoBehaviour
             {
                 if (grid[i, j].match)
                 {
+
+
+
                     grid[i, j].col = j;
                     grid[i, j].row = i;
 
-                    isMoving = true;
-                    UpAndDown(i, j);
+                    isLocked = true;
+                    moveToUpMatchBlock(i, j);
                 }
             }
         }
@@ -290,7 +291,8 @@ public class ExecuteLogic : MonoBehaviour
             {
                 if (grid[i, j].match)
                 {
-                    isMoving = true;
+
+                    isLocked = true;
                     grid[i, j].reInit(ref num);
                 }
             }
@@ -299,22 +301,20 @@ public class ExecuteLogic : MonoBehaviour
 
     }
 
-    void UpAndDown(int i, int j)
+    void moveToUpMatchBlock(int i, int j)
     {
         for (int n = i; n > 0; n--)
         {
             if (grid[n, j].match == false)
             {
+
+
                 Utilities.swap(grid,grid[n, j], grid[i, j]);
                 break;
             }
         }
     }
 
-    public static void goalProgress()
-    {
-        goal--;
-        goal_text.text = goal.ToString();
-    }
+   
 
 }

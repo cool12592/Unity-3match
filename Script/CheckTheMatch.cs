@@ -13,15 +13,22 @@ public class CheckTheMatch : MonoBehaviour
 
     public void checkMatch()
     {
+        if (ExecuteLogic.isLocked)
+            return;
+
+        checkNormalMatch();
+        checkItemMatch();
+    }
+
+    void checkNormalMatch()
+    {
         //매칭o
         for (int i = 1; i < ExecuteLogic.n; i++)
         {
             for (int j = 1; j < ExecuteLogic.m; j++)
             {
                 var nowBlock = grid[i, j];
-
-                //if (NotCheckBlock(nowBlock.kind))
-                //   continue;
+                nowBlock.isItemMatch = false;
 
                 if (nowBlock.kind == nowBlock.getDown().kind)
                 {
@@ -46,7 +53,7 @@ public class CheckTheMatch : MonoBehaviour
         }
     }
 
-    public void checkItemMatch()
+    void checkItemMatch()
     {
         FiveBlock();
         TwoByTwoBlock();
@@ -59,25 +66,20 @@ public class CheckTheMatch : MonoBehaviour
         {
             for (int j = 1; j < ExecuteLogic.m; j++)
             {
-                var nowBlock = grid[i, j];
+                var block1 = grid[i, j];
+                var block2 = block1.getRight();
+                var block3 = block1.getDown();
+                var block4 = block1.getRight().getDown();
 
-
-                //if (NotCheckBlock(nowBlock.kind))
-                //    continue;
-
-                var block2 = nowBlock.getRight();
-                var block3 = nowBlock.getDown();
-                var block4 = nowBlock.getRight().getDown();
-
-                if (nowBlock.kind == block2.kind &&
-                    nowBlock.kind == block3.kind &&
-                    nowBlock.kind == block4.kind)
+                if(checkItemMatchBlock(block1,block2,block3,block4))
+                    continue;
+                
+                if (block1.kind == block2.kind &&
+                    block1.kind == block3.kind &&
+                    block1.kind == block4.kind)
                 {
-                    nowBlock.tryToErase();
-                    block2.tryToErase();
-                    block3.tryToErase();
-                    block4.tryToErase();
-                    changeToItemBlock(ExecuteLogic.snowBlockPool.GetObject(), nowBlock, block2, block3, block4);
+                    markItemMatchBlocks(block1, block2, block3, block4);
+                    changeToItemBlock(ExecuteLogic.snowBlockPool.GetObject(), block1, block2, block3, block4);
                 }
             }
         }
@@ -89,21 +91,22 @@ public class CheckTheMatch : MonoBehaviour
         {
             for (int j = 1; j <= ExecuteLogic.m - 5; j++)
             {
-                var nowBlock = grid[i, j];
-                if (nowBlock.kind == nowBlock.getLeft().kind) continue; //6줄이상방지
-
-
-                var block2 = nowBlock.getRight();
+                var block1 = grid[i, j];
+                var block2 = block1.getRight();
                 var block3 = block2.getRight();
                 var block4 = block3.getRight();
                 var block5 = block4.getRight();
 
-                if (nowBlock.kind == block2.kind &&
-                    nowBlock.kind == block3.kind &&
-                    nowBlock.kind == block4.kind &&
-                    nowBlock.kind == block5.kind)
+                if (checkItemMatchBlock(block1, block2, block3, block4,block5))
+                    continue;
+
+                if (block1.kind == block2.kind &&
+                    block1.kind == block3.kind &&
+                    block1.kind == block4.kind &&
+                    block1.kind == block5.kind)
                 {
-                    changeToItemBlock(ExecuteLogic.rainBowBlockPool.GetObject(), nowBlock, block2, block3, block4, block5);
+                    markItemMatchBlocks(block1, block2, block3, block4, block5);
+                    changeToItemBlock(ExecuteLogic.rainBowBlockPool.GetObject(), block1, block2, block3, block4, block5);
                 }
             }
         }
@@ -112,24 +115,22 @@ public class CheckTheMatch : MonoBehaviour
         {
             for (int j = 1; j < ExecuteLogic.m; j++)
             {
-                var nowBlock = grid[i, j];
-                if (nowBlock.kind == nowBlock.getUp().kind) continue; //6줄이상방지
-
-                //if (NotCheckBlock(nowBlock.kind))
-                // continue;
-
-                var block2 = nowBlock.getDown();
+                var block1 = grid[i, j];
+                var block2 = block1.getDown();
                 var block3 = block2.getDown();
                 var block4 = block3.getDown();
                 var block5 = block4.getDown();
 
+                if (checkItemMatchBlock(block1, block2, block3, block4, block5))
+                    continue;
 
-                if (nowBlock.kind == block2.kind &&
-                    nowBlock.kind == block3.kind &&
-                    nowBlock.kind == block4.kind &&
-                    nowBlock.kind == block5.kind)
+                if (block1.kind == block2.kind &&
+                    block1.kind == block3.kind &&
+                    block1.kind == block4.kind &&
+                    block1.kind == block5.kind)
                 {
-                    changeToItemBlock(ExecuteLogic.rainBowBlockPool.GetObject(), nowBlock, block2, block3, block4, block5);
+                    markItemMatchBlocks(block1, block2, block3, block4,block5);
+                    changeToItemBlock(ExecuteLogic.rainBowBlockPool.GetObject(), block1, block2, block3, block4, block5);
                 }
             }
         }
@@ -141,19 +142,20 @@ public class CheckTheMatch : MonoBehaviour
         {
             for (int j = 1; j <= ExecuteLogic.m - 4; j++)
             {
-                var nowBlock = grid[i, j];
-                if (nowBlock.kind == nowBlock.getLeft().kind) continue; //5줄이상방지
-
-
-                var block2 = nowBlock.getRight();
+                var block1 = grid[i, j];
+                var block2 = block1.getRight();
                 var block3 = block2.getRight();
                 var block4 = block3.getRight();
 
-                if (nowBlock.kind == block2.kind &&
-                    nowBlock.kind == block3.kind &&
-                    nowBlock.kind == block4.kind)
+                if (checkItemMatchBlock(block1, block2, block3, block4))
+                    continue;
+
+                if (block1.kind == block2.kind &&
+                    block1.kind == block3.kind &&
+                    block1.kind == block4.kind)
                 {
-                    changeToItemBlock(ExecuteLogic.ribbonBlockPool.GetObject(), nowBlock, block2, block3, block4);
+                    markItemMatchBlocks(block1, block2, block3, block4);
+                    changeToItemBlock(ExecuteLogic.ribbonBlockPool.GetObject(), block1, block2, block3, block4);
                 }
             }
         }
@@ -163,22 +165,41 @@ public class CheckTheMatch : MonoBehaviour
         {
             for (int j = 1; j < ExecuteLogic.m; j++)
             {
-                var nowBlock = grid[i, j];
-                if (nowBlock.kind == nowBlock.getUp().kind) continue; //5줄이상방지
-                // if (NotCheckBlock(nowBlock.kind))
-                // continue;
-
-                var block2 = nowBlock.getDown();
+                var block1 = grid[i, j];
+                var block2 = block1.getDown();
                 var block3 = block2.getDown();
                 var block4 = block3.getDown();
 
-                if (nowBlock.kind == block2.kind &&
-                    nowBlock.kind == block3.kind &&
-                    nowBlock.kind == block4.kind)
+                if (checkItemMatchBlock(block1, block2, block3, block4))
+                    continue;
+
+                if (block1.kind == block2.kind &&
+                    block1.kind == block3.kind &&
+                    block1.kind == block4.kind)
                 {
-                    changeToItemBlock(ExecuteLogic.ribbonBlockPool.GetObject(), nowBlock, block2, block3, block4);
+                    markItemMatchBlocks(block1, block2, block3, block4);
+                    changeToItemBlock(ExecuteLogic.ribbonBlockPool.GetObject(), block1, block2, block3, block4);
                 }
             }
+        }
+    }
+
+
+    bool checkItemMatchBlock(params BasicBlock[] blocks)
+    {
+        foreach (BasicBlock block in blocks)
+        {
+            if (block.isItemMatch)
+                return true;
+        }
+        return false;
+    }
+
+    void markItemMatchBlocks(params BasicBlock[] blocks)
+    {
+        foreach (BasicBlock block in blocks)
+        {
+            block.setItemMatch();
         }
     }
 
