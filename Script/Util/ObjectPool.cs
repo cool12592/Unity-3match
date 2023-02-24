@@ -12,7 +12,7 @@ public class ObjectPool : MonoBehaviour
     public void init(BasicBlock poolingObjectPrefab_)
     {
         poolingObjectPrefab = poolingObjectPrefab_;
-        Initialize(ExecuteLogic.n * ExecuteLogic.m);
+        Initialize(MainLogic.rowSize * MainLogic.colSize);
     }
 
     private void Initialize(int initCount)

@@ -21,7 +21,7 @@ public class MouseInput : MonoBehaviour
 
     public void updateMouseInput()
     {
-        if (ExecuteLogic.isSwap || ExecuteLogic.isLocked)
+        if (MainLogic.isSwap || MainLogic.isLocked)
             return;
         mouseClick();
         mouseDrag();
@@ -33,8 +33,8 @@ public class MouseInput : MonoBehaviour
         {
             // offset/2를 빼주는 이유는 보드의 왼쪽상단 좌표를 0,0으로 맞춰주기 위함
             pos = (Vector2)(Camera.main.ScreenToWorldPoint(Input.mousePosition)) - offset / 2f;
-            x1 = (int)(pos.x / ExecuteLogic.tileSize) + 1;
-            y1 = (int)(-pos.y / ExecuteLogic.tileSize);
+            x1 = (int)(pos.x / MainLogic.tileSize) + 1;
+            y1 = (int)(-pos.y / MainLogic.tileSize);
 
             if (Utilities.checkBoardRange(x1, y1))
             {
@@ -52,8 +52,8 @@ public class MouseInput : MonoBehaviour
                 return;
 
             pos = (Vector2)(Camera.main.ScreenToWorldPoint(Input.mousePosition)) - offset / 2f;
-            x2 = (int)(pos.x / ExecuteLogic.tileSize) + 1;
-            y2 = (int)(-pos.y / ExecuteLogic.tileSize);
+            x2 = (int)(pos.x / MainLogic.tileSize) + 1;
+            y2 = (int)(-pos.y / MainLogic.tileSize);
 
             if (Utilities.checkBoardRange(x2, y2) == false)
             {

@@ -16,12 +16,11 @@ public class DrawTheBoard : MonoBehaviour
         grid = grid_;
     }
 
-
     public void drawBoard()
     {
-        for (int i = 1; i < ExecuteLogic.n; i++)
+        for (int i = 1; i < MainLogic.rowSize; i++)
         {
-            for (int j = 1; j < ExecuteLogic.m; j++)
+            for (int j = 1; j < MainLogic.colSize; j++)
             {
                 setAlpha(grid[i, j]);
                 setSprite(grid[i, j], grid[i, j].kind);
@@ -34,51 +33,50 @@ public class DrawTheBoard : MonoBehaviour
     {
         float z = 0f;
 
-        if (go.kind == 4)
+        if (go.kind == kindType.Snow)
             z = -1f;
 
         if (go.y > 0f)
             z = 1000f;
 
-
         go.GetComponent<Transform>().position = new Vector3(go.x, go.y, z);
 
     }
 
-    void setSprite(BasicBlock go, int kind)
+    void setSprite(BasicBlock go, kindType kind)
     {
         var spriteRenderer_ = go.GetComponent<SpriteRenderer>();
 
         switch (kind)
         {
-            case 0:
+            case kindType.block1:
                 if (go is RibbonBlock)
                     spriteRenderer_.sprite = itemBlockSprites[0];
                 else
                     spriteRenderer_.sprite = blockSprites[0];
                 break;
-            case 1:
+            case kindType.block2:
                 if (go is RibbonBlock)
                     spriteRenderer_.sprite = itemBlockSprites[1];
                 else
                     spriteRenderer_.sprite = blockSprites[1];
                 break;
-            case 2:
+            case kindType.block3:
                 if (go is RibbonBlock)
                     spriteRenderer_.sprite = itemBlockSprites[2];
                 else
                     spriteRenderer_.sprite = blockSprites[2];
                 break;
-            case 3:
+            case kindType.block4:
                 if (go is RibbonBlock)
                     spriteRenderer_.sprite = itemBlockSprites[3];
                 else
                     spriteRenderer_.sprite = blockSprites[3];
                 break;
-            case 4:
+            case kindType.Snow:
                 spriteRenderer_.sprite = itemBlockSprites[4];
                 break;
-            case 5:
+            case kindType.Rainbow:
                 spriteRenderer_.sprite = itemBlockSprites[5];
                 break;
             default:

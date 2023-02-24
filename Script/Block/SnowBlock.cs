@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SnowBlock : BasicBlock
 {
-    public int snowLevel = 1;
+    int snowLevel = 1;
     float snowSpeed = 2.5f;
     int origin_col=0, origin_row = 0;
 
@@ -14,7 +14,7 @@ public class SnowBlock : BasicBlock
     {
         base.init(grid_, i, j);
         alpha = 0.3f;
-        kind = 4;
+        kind = kindType.Snow;
     }
 
     public override bool moveBlock(float dis, bool isXmove)
@@ -69,7 +69,7 @@ public class SnowBlock : BasicBlock
 
         if (Utilities.checkBoardRange(target_x, target_y))
         {
-            snowPower(grid[target_y, target_x]);
+            snowCollide(grid[target_y, target_x]);
         }
 
         if (snowLevel == 2)
@@ -81,8 +81,9 @@ public class SnowBlock : BasicBlock
 
             if (Utilities.checkBoardRange(target_x, target_y))
             {
-                snowPower(grid[target_y, target_x]);
+                snowCollide(grid[target_y, target_x]);
             }
+
             if (isXmove)
                 target_y -= 2;
             else
@@ -90,9 +91,30 @@ public class SnowBlock : BasicBlock
 
             if (Utilities.checkBoardRange(target_x, target_y))
             {
-                snowPower(grid[target_y, target_x]);
+                snowCollide(grid[target_y, target_x]);
             }
         }
+    }
+
+    void snowCollide(BasicBlock target)
+    {
+        if (target == this)
+            return;
+
+        target.alpha = 0.5f;
+
+        if (target is SnowBlock)
+        {
+            if (snowLevel == 1)
+            {
+                target.alpha = 0f;
+                StartCoroutine(bigSnow());
+            }
+
+            target.match = true;
+        }
+        else
+            target.tryToErase();
     }
 
     public override void arriveToDest()
@@ -108,29 +130,7 @@ public class SnowBlock : BasicBlock
             GameManager.Instance.goalProgress();
         }
 
-        x = col * ExecuteLogic.tileSize;
-        y = -row * ExecuteLogic.tileSize;
-    }
-
-
-    void snowPower(BasicBlock target)
-    {
-        if (target == this)
-            return;
-        target.alpha = 0.5f;
-
-        if (target is SnowBlock)
-        {
-            if (snowLevel == 1)
-            {
-                target.alpha = 0f;
-                StartCoroutine(bigSnow());
-            }
-            
-            target.match = true;
-        }
-        else
-            target.tryToErase();
+        base.arriveToDest();
     }
 
     public void readyItem(Direction dir)
@@ -189,7 +189,7 @@ public class SnowBlock : BasicBlock
 
     IEnumerator bigSnow()
     {
-        ExecuteLogic.isMovePause = true;
+        MainLogic.isMovePause = true;
         var num = GetComponent<Transform>().localScale.sqrMagnitude;
         var size = GetComponent<Transform>().localScale;
         while (num < 10f)
@@ -200,17 +200,17 @@ public class SnowBlock : BasicBlock
             GetComponent<Transform>().localScale = size + (size * Time.deltaTime);
         }
         snowLevel = 2;
-        ExecuteLogic.isMovePause = false;
+        MainLogic.isMovePause = false;
     }
 
     public override void reInit(ref int num)
     {
         base.reInit(ref num);
-        Utilities.ChangeBlock(grid, this, ExecuteLogic.basicBlockPool.GetObject());
+        Utilities.ChangeBlock(grid, this, MainLogic.basicBlockPool.GetObject());
     }
 
     public override void returnObjectPool()
     {
-        ExecuteLogic.snowBlockPool.ReturnObject(this);
+        MainLogic.snowBlockPool.ReturnObject(this);
     }
 }

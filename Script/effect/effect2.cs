@@ -4,34 +4,29 @@ using UnityEngine;
 
 public class effect2 : MonoBehaviour
 {
-    Vector3 target_pos;
+    Vector3 targetPos;
     float speed = 10f;
     bool isRuning = false;
-    public void init(Vector3 target_pos_)
+
+    public void init(Vector3 targetPos_)
     {
-        target_pos = target_pos_;
+        targetPos = targetPos_;
         isRuning = true;
     }
-    // Start is called before the first frame update
-    void Start()
-    {
 
-    }
-
-    // Update is called once per frame
     void Update()
     {
         if (isRuning)
         {
             var nowPos = GetComponent<Transform>().position;
-            if ((nowPos - target_pos).sqrMagnitude <=0.1f)
+            if ((nowPos - targetPos).sqrMagnitude <=0.1f)
             {
                 isRuning = false;
                 Destroy(gameObject);
             }
             else
             {
-                GetComponent<Transform>().position = Vector3.Lerp(nowPos, target_pos, Time.deltaTime * speed);
+                GetComponent<Transform>().position = Vector3.Lerp(nowPos, targetPos, Time.deltaTime * speed);
             }
         }
     }

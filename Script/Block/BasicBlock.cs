@@ -4,78 +4,60 @@ using UnityEngine;
 using System;
 public class BasicBlock : MonoBehaviour
 {
-    public int col, row, kind;
+    public int col, row;
+    public kindType kind;
     public bool match,isItemMatch;
-    public float x, y,alpha;
+    public float x, y, alpha;
     
-    protected BasicBlock[,] grid;
     public bool itemOn;
-    
     protected float speed = 5f;
+    protected BasicBlock[,] grid;
+
     public event Action arriveDestAction;
 
-    // Start is called before the first frame update
     public virtual void init(BasicBlock[,] grid_,int i,int j)
     {
-        kind = -1;
-        alpha = 1f;
         grid = grid_;
+        kind = kindType.None;
+        alpha = 1f;
         itemOn = false;
         match = false;
 
         col = j;
         row = i;
 
-        x = j * ExecuteLogic.tileSize;
-        y = -i * ExecuteLogic.tileSize;
+        x = j * MainLogic.tileSize;
+        y = -i * MainLogic.tileSize;
 
-        kind = UnityEngine.Random.Range(0, 4);
-        if (i == 0 || j == 0 || i == ExecuteLogic.n || j == ExecuteLogic.m)
-            kind = -1;
+        kind =(kindType)(UnityEngine.Random.Range(1, 5));
+        if (i == 0 || j == 0 || i == MainLogic.rowSize || j == MainLogic.colSize)
+            kind = kindType.None;
     }
 
     public BasicBlock getRight()
     {
-        if (checkBoardRange(col+1, row) == false)
-            Debug.Log("aaa");
         return grid[row,col + 1];
     }
 
     public BasicBlock getLeft()
     {
-        if (checkBoardRange(col-1, row) == false)
-            Debug.Log("aaa");
         return grid[row, col - 1];
     }
 
     public BasicBlock getDown()
     {
-        if (checkBoardRange(col, row + 1) == false)
-            Debug.Log("aaa");
         return grid[row+1, col];
     }
 
     public BasicBlock getUp() 
     {
-        if (checkBoardRange(col, row - 1) == false)
-            Debug.Log("aaa");
         return grid[row - 1, col];
-    }
-
-    public static bool checkBoardRange(int x, int y)
-    {
-        if (x < 0 || ExecuteLogic.m < x)
-            return false;
-        if (y < 0 || ExecuteLogic.n < y)
-            return false;
-
-        return true;
     }
 
     public bool moveToDest()
     {
-        float dx = x - (col * ExecuteLogic.tileSize);
-        float dy = y + (row * ExecuteLogic.tileSize);
+        float dx = x - (col * MainLogic.tileSize);
+        float dy = y + (row * MainLogic.tileSize);
         bool b1 = moveBlock(dx, true);
         bool b2 = moveBlock(dy, false);
 
@@ -118,8 +100,8 @@ public class BasicBlock : MonoBehaviour
         arriveDestAction?.Invoke();
         arriveDestAction = null;
       
-        x = col * ExecuteLogic.tileSize;
-        y = -row * ExecuteLogic.tileSize;
+        x = col * MainLogic.tileSize;
+        y = -row * MainLogic.tileSize;
     }
 
     public void setItemMatch()
@@ -144,14 +126,12 @@ public class BasicBlock : MonoBehaviour
 
     public void deactivate()
     {
-        
-
         itemOn = false;
         match = false;
 
-        kind = UnityEngine.Random.Range(0, 4);
-        y = ExecuteLogic.tileSize * -100;
-        x = ExecuteLogic.tileSize * -100;
+        kind = (kindType)(UnityEngine.Random.Range(1, 5));
+        y = MainLogic.tileSize * -100;
+        x = MainLogic.tileSize * -100;
         alpha = 1f;
 
         GetComponent<Transform>().localScale = new Vector3(1f, 1f, 1f);
@@ -162,15 +142,15 @@ public class BasicBlock : MonoBehaviour
 
     public virtual void returnObjectPool()
     {
-        ExecuteLogic.basicBlockPool.ReturnObject(this);
+        MainLogic.basicBlockPool.ReturnObject(this);
     }
 
     public virtual void reInit(ref int num)
     {
         itemOn = false;
-        kind = UnityEngine.Random.Range(0, 4);
-        y = ExecuteLogic.tileSize * num++; //삭제된거는 판보다더 위로감 무빙애니에서 내려오게됨
-        x = ExecuteLogic.tileSize * col;
+        kind = (kindType)(UnityEngine.Random.Range(1, 5));
+        y = MainLogic.tileSize * num++; //삭제된거는 위칸으로 올라감
+        x = MainLogic.tileSize * col;
         match = false;
         alpha = 1f;
 

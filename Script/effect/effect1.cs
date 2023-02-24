@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class effect : MonoBehaviour
+public class effect1 : MonoBehaviour
 {
     int dir = 0;
     float speed = 10f;
@@ -12,22 +12,15 @@ public class effect : MonoBehaviour
         dir = dir_;
         Destroy(gameObject, 2f);
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
     void Update()
     {
         if(dir!=0)
         {
-
             switch (dir)
             {
                 case 1:
-                    transform.Translate(transform.up * Time.deltaTime*speed);
+                    transform.Translate(transform.up * Time.deltaTime * speed);
                     break;
                 case 2:
                     transform.Translate(-transform.up * Time.deltaTime * speed);

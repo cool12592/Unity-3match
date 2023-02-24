@@ -8,26 +8,27 @@ public class RainbowBlock : BasicBlock
     [SerializeField]
     private GameObject effect;
     bool isNotArrive = true;
-    int targetKind = -1;
+    BasicBlock target;
+    kindType targetKind;
 
     public override void init(BasicBlock[,] grid_, int i, int j)
     {
         base.init(grid_, i, j);
         alpha = 0.3f;
-        kind = 5;
+        kind = kindType.Rainbow;
     }
 
-    public void readyItem(int kind_)
+    public void readyItem(BasicBlock block)
     {
         itemOn = true;
-        targetKind = kind_;
+        target = block;
     }
 
     public override void arriveToDest()
     {
         arrive();
-        x = col * ExecuteLogic.tileSize;
-        y = -row * ExecuteLogic.tileSize;
+        x = col * MainLogic.tileSize;
+        y = -row * MainLogic.tileSize;
     }
 
     public void arrive()
@@ -47,41 +48,54 @@ public class RainbowBlock : BasicBlock
 
     public override bool useItem()
     {
-        
         if (match || isNotArrive)
             return true;
 
         match = true;
-        alpha = 0.5f;
+        alpha = 0.7f;
         itemOn = false;
 
-        if (targetKind == 5)
+        if(target == null || target?.kind == kindType.Snow)
         {
-            for (int i = 1; i < ExecuteLogic.n; i++)
-            {
-                for (int j = 1; j < ExecuteLogic.m; j++)
-                {
-                    if (grid[i, j].kind == 5)
-                    {
-                        grid[i, j].match = true;
-                        continue;
-                    }
-                    effectSpawn(grid[i, j].GetComponent<Transform>().position);
-                    grid[i, j].tryToErase();
-                }
-            }
+            targetKind = (kindType)(Random.Range(1, 5));
+        }
+        else
+            targetKind = target.kind;
+
+        if (targetKind == kindType.Rainbow)
+        {
+            clearTheAllBlock();
             return true;
         }
 
-        if (targetKind == -1 || targetKind ==4)
+        clearTheTargetBlocks();
+        target?.tryToErase();
+
+        return true;
+    }
+
+    void clearTheAllBlock()
+    {
+        for (int i = 1; i < MainLogic.rowSize; i++)
         {
-            targetKind = Random.Range(0, 4);
+            for (int j = 1; j < MainLogic.colSize; j++)
+            {
+                if (grid[i, j].kind == kindType.Rainbow)
+                {
+                    grid[i, j].match = true;
+                    continue;
+                }
+                effectSpawn(grid[i, j].GetComponent<Transform>().position);
+                grid[i, j].tryToErase();
+            }
         }
+    }
 
-
-        for (int i = 1; i < ExecuteLogic.n; i++)
+    void clearTheTargetBlocks()
+    {
+        for (int i = 1; i < MainLogic.rowSize; i++)
         {
-            for (int j = 1; j < ExecuteLogic.m; j++)
+            for (int j = 1; j < MainLogic.colSize; j++)
             {
                 if (grid[i, j].kind == targetKind)
                 {
@@ -90,22 +104,21 @@ public class RainbowBlock : BasicBlock
                 }
             }
         }
-        return true;
     }
 
-    void effectSpawn(Vector3 target_pos)
+    void effectSpawn(Vector3 targetPos)
     {
-        Instantiate(effect, new Vector3(col * ExecuteLogic.tileSize, -row * ExecuteLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect2>().init(target_pos);
+        Instantiate(effect, new Vector3(col * MainLogic.tileSize, -row * MainLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect2>().init(targetPos);
     }
 
     public override void reInit(ref int num)
     {
         base.reInit(ref num);
-        Utilities.ChangeBlock(grid,this, ExecuteLogic.basicBlockPool.GetObject());
+        Utilities.ChangeBlock(grid, this, MainLogic.basicBlockPool.GetObject());
     }
 
     public override void returnObjectPool()
     {
-        ExecuteLogic.rainBowBlockPool.ReturnObject(this);
+        MainLogic.rainBowBlockPool.ReturnObject(this);
     }
 }

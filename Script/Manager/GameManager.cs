@@ -11,14 +11,13 @@ public class GameManager : MonoBehaviour
     private Text goal_text;
     private Text move_text;
     int move = 18;
-    int goal = 50;
+    int goal = 5;
 
     [SerializeField]
     private GameObject stageClearImage;
     [SerializeField]
     private GameObject stageFaiImage;
 
-    //게임 매니저 인스턴스에 접근할 수 있는 프로퍼티. static이므로 다른 클래스에서 맘껏 호출할 수 있다.
     private static GameManager instance = null;
 
     private void Awake()

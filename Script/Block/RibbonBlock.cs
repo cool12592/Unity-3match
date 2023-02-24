@@ -7,7 +7,6 @@ public class RibbonBlock : BasicBlock
 
     [SerializeField]
     private GameObject effect;
-
     float timer = 0f;
 
     public override void init(BasicBlock[,] grid_, int i, int j)
@@ -36,8 +35,10 @@ public class RibbonBlock : BasicBlock
 
     public override void tryToErase()
     {
-        if (match)
+        if (match || itemOn)
+        {
             return;
+        }
         alpha = 0.7f; 
         itemOn = true;
     }
@@ -53,24 +54,22 @@ public class RibbonBlock : BasicBlock
         int ran = Random.Range(0, 4);
         if (ran <= 1)
         {
-            Instantiate(effect, new Vector3(col * ExecuteLogic.tileSize, -row * ExecuteLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect>().init(1);
-            Instantiate(effect, new Vector3(col * ExecuteLogic.tileSize, -row * ExecuteLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect>().init(2);
+            Instantiate(effect, new Vector3(col * MainLogic.tileSize, -row * MainLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect1>().init(1);
+            Instantiate(effect, new Vector3(col * MainLogic.tileSize, -row * MainLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect1>().init(2);
 
-            for (int i = 1; i < ExecuteLogic.n; i++)
+            for (int i = 1; i < MainLogic.rowSize; i++)
             {
-                grid[i, col].tryToErase();
-                
+                grid[i, col].tryToErase();   
             }
         }
         else
         {
-            Instantiate(effect, new Vector3(col * ExecuteLogic.tileSize, -row * ExecuteLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect>().init(3);
-            Instantiate(effect, new Vector3(col * ExecuteLogic.tileSize, -row * ExecuteLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect>().init(4);
+            Instantiate(effect, new Vector3(col * MainLogic.tileSize, -row * MainLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect1>().init(3);
+            Instantiate(effect, new Vector3(col * MainLogic.tileSize, -row * MainLogic.tileSize, 0f), Quaternion.identity).GetComponent<effect1>().init(4);
 
-            for (int j = 1; j < ExecuteLogic.m; j++)
+            for (int j = 1; j < MainLogic.colSize; j++)
             {
-                grid[row, j].tryToErase();
-                
+                grid[row, j].tryToErase();  
             }
         }
         return true;
@@ -80,11 +79,11 @@ public class RibbonBlock : BasicBlock
     public override void reInit(ref int num)
     {
         base.reInit(ref num);
-        Utilities.ChangeBlock(grid, this, ExecuteLogic.basicBlockPool.GetObject());
+        Utilities.ChangeBlock(grid, this, MainLogic.basicBlockPool.GetObject());
     }
 
     public override void returnObjectPool()
     {
-        ExecuteLogic.ribbonBlockPool.ReturnObject(this);
+        MainLogic.ribbonBlockPool.ReturnObject(this);
     }
 }
