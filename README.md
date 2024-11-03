@@ -1,4 +1,4 @@
-# 3-match
+# 3 match Puzzle
 
 유니티로 3 Mathch Puzzle 게임을 구현한 코드입니다.
 퍼즐내에 다양한 효과의 아이템들이 존재하고 
